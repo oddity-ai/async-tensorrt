@@ -1,4 +1,4 @@
-use async_cuda_core::runtime::Future;
+use async_cuda::runtime::Future;
 
 use crate::ffi::builder_config::BuilderConfig;
 use crate::ffi::memory::HostBuffer;

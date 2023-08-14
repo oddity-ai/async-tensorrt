@@ -1,5 +1,5 @@
-use async_cuda_core::runtime::Future;
-use async_cuda_core::{DeviceBuffer, Stream};
+use async_cuda::runtime::Future;
+use async_cuda::{DeviceBuffer, Stream};
 
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::sync::engine::Engine as InnerEngine;

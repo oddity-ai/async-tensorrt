@@ -1,4 +1,4 @@
-use async_cuda_core::ffi::device::Device;
+use async_cuda::ffi::device::Device;
 
 use async_tensorrt::ffi::network::NetworkDefinitionCreationFlags;
 use async_tensorrt::ffi::parser::Parser;

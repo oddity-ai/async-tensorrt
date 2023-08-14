@@ -4,7 +4,7 @@ pub enum Error {
     /// TensorRT error described by error message.
     TensorRt { message: String },
     /// Error in CUDA backend.
-    Cuda(async_cuda_core::Error),
+    Cuda(async_cuda::Error),
 }
 
 impl std::fmt::Display for Error {
@@ -18,9 +18,9 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-impl From<async_cuda_core::Error> for Error {
+impl From<async_cuda::Error> for Error {
     #[inline]
-    fn from(err: async_cuda_core::Error) -> Self {
+    fn from(err: async_cuda::Error) -> Self {
         Error::Cuda(err)
     }
 }
