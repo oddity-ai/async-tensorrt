@@ -29,7 +29,7 @@ Make sure you have the necessary dependencies installed:
 Then, add the following to your dependencies in `Cargo.toml`:
 
 ```toml
-async-tensorrt = "0.1"
+async-tensorrt = "0.5"
 ```
 
 ## ⚠️ Safety warning
