@@ -3,6 +3,7 @@ use async_cuda::ffi::device::Device;
 use async_tensorrt::ffi::network::NetworkDefinitionCreationFlags;
 use async_tensorrt::ffi::parser::Parser;
 use async_tensorrt::ffi::sync::builder::Builder;
+use async_tensorrt::ffi::sync::engine::ExecutionContext;
 use async_tensorrt::ffi::sync::runtime::Runtime;
 
 /// This integration test helps determine which ffi functions affect the GPU state, or local thread
@@ -19,7 +20,7 @@ use async_tensorrt::ffi::sync::runtime::Runtime;
 /// Run this integration test under the Nsight profile with the following command:
 ///
 /// ```bash
-/// nsys profile --output /tmp/side_effects_trace cargo --force-overwrite true test --release --test side_effects_test
+/// nsys profile --output /tmp/side_effects_trace --force-overwrite true cargo test --release --test functions_side_effects_test
 /// ```
 ///
 /// Use the `nsys-ui` utility to inspect the report produced in `/tmp/side_effects_trace.qdstrm` and
@@ -58,6 +59,10 @@ use async_tensorrt::ffi::sync::runtime::Runtime;
 /// | `ExecutionContext::from_engine_many`         | ✅               | ❓                        | Assumed (uses `createExecutionContext` internally).
 /// | `ExecutionContext::new`                      | ✅               | ❓                        | Assumed (uses `createExecutionContext` internally).
 /// | `ExecutionContext::enqueue`                  | ✅               | ❓                        | Assumed (uses `createExecutionContext` internally).
+/// | `ExecutionContext::drop`                     | ✅               | ❓                        |
+/// | `Engine::drop`                               | ❌               | ❌                        |
+/// | `Runtime::drop`                              | ❌               | ❌                        |
+/// | `Builder::drop`                              | ✅               | ❓                        |
 #[tokio::test]
 async fn test_stream_new_side_effects() {
     // First block contains stuff we are not interested in measuring...
@@ -115,7 +120,7 @@ async fn test_stream_new_side_effects() {
     let runtime = Runtime::new();
     Device::synchronize().unwrap();
 
-    let engine = runtime.deserialize_engine_from_plan(&plan).unwrap();
+    let mut engine = runtime.deserialize_engine_from_plan(&plan).unwrap();
     Device::synchronize().unwrap();
 
     let _engine_serialized = engine.serialize().unwrap();
@@ -131,6 +136,24 @@ async fn test_stream_new_side_effects() {
     Device::synchronize().unwrap();
 
     let _ = engine.tensor_io_mode(&first_tensor_name);
+    Device::synchronize().unwrap();
+
+    let execution_context = ExecutionContext::new(&mut engine);
+    Device::synchronize().unwrap();
+
+    drop(execution_context);
+    Device::synchronize().unwrap();
+
+    drop(engine);
+    Device::synchronize().unwrap();
+
+    let runtime = Runtime::new();
+    Device::synchronize().unwrap();
+
+    drop(runtime);
+    Device::synchronize().unwrap();
+
+    drop(builder);
     Device::synchronize().unwrap();
 }
 

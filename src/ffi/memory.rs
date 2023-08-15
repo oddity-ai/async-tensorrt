@@ -68,14 +68,14 @@ impl HostBuffer {
     }
 
     /// Get internal readonly pointer.
-    #[inline]
+    #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
         let HostBuffer(internal) = *self;
         internal
     }
 
     /// Get internal mutable pointer.
-    #[inline]
+    #[inline(always)]
     pub fn as_mut_ptr(&mut self) -> *mut std::ffi::c_void {
         let HostBuffer(internal) = *self;
         internal
