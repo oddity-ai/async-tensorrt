@@ -33,8 +33,7 @@ unsafe impl Sync for Runtime {}
 
 impl Runtime {
     pub fn new() -> Self {
-        let device =
-            Device::get().unwrap_or_else(|err| panic!("failed to get current device: {err}"));
+        let device = Device::get_or_panic();
         let addr = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
             return createInferRuntime(GLOBAL_LOGGER);
         });
@@ -74,7 +73,7 @@ impl Runtime {
         buffer_ptr: *const std::ffi::c_void,
         buffer_size: usize,
     ) -> Result<Engine> {
-        Device::bind(self.device)?;
+        Device::set(self.device)?;
         let internal = self.as_mut_ptr();
         let internal_engine = cpp!(unsafe [
             internal as "void*",
@@ -104,7 +103,7 @@ impl Runtime {
 
 impl Drop for Runtime {
     fn drop(&mut self) {
-        let _device_guard = Device::bind_or_panic(self.device);
+        Device::set_or_panic(self.device);
         let internal = self.as_mut_ptr();
         cpp!(unsafe [
             internal as "void*"

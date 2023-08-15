@@ -130,7 +130,7 @@ impl Engine {
 
 impl Drop for Engine {
     fn drop(&mut self) {
-        let _device_guard = Device::bind_or_panic(self.runtime.device());
+        Device::set_or_panic(self.runtime.device());
         let Engine { internal, .. } = *self;
         cpp!(unsafe [
             internal as "void*"
@@ -262,7 +262,7 @@ impl<'engine> ExecutionContext<'engine> {
     }
 
     unsafe fn new_internal(engine: &mut Engine) -> *mut std::ffi::c_void {
-        let _device_guard = Device::bind_or_panic(engine.device());
+        Device::set_or_panic(engine.device());
         let internal_engine = engine.as_mut_ptr();
         let internal = cpp!(unsafe [
             internal_engine as "void*"
@@ -301,7 +301,7 @@ impl<'engine> ExecutionContext<'engine> {
 
 impl<'engine> Drop for ExecutionContext<'engine> {
     fn drop(&mut self) {
-        let _device_guard = Device::bind_or_panic(self.device);
+        Device::set_or_panic(self.device);
         let ExecutionContext { internal, .. } = *self;
         cpp!(unsafe [
             internal as "void*"

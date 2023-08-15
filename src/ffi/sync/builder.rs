@@ -34,8 +34,7 @@ unsafe impl Sync for Builder {}
 
 impl Builder {
     pub fn new() -> Self {
-        let device =
-            Device::get().unwrap_or_else(|err| panic!("failed to get current device: {err}"));
+        let device = Device::get_or_panic();
         let addr = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
             return createInferBuilder(GLOBAL_LOGGER);
         });
@@ -141,7 +140,7 @@ impl Builder {
 
 impl Drop for Builder {
     fn drop(&mut self) {
-        let _device_guard = Device::bind_or_panic(self.device);
+        Device::set_or_panic(self.device);
         let internal = self.as_mut_ptr();
         cpp!(unsafe [
             internal as "void*"
