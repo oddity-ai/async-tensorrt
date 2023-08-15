@@ -1,5 +1,8 @@
 use cpp::cpp;
 
+use async_cuda::device::DeviceId;
+use async_cuda::ffi::device::Device;
+
 use crate::error::last_error;
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::result;
@@ -12,7 +15,7 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 /// Refer to [`crate::Engine`] for documentation.
 pub struct Engine {
     internal: *mut std::ffi::c_void,
-    _runtime: Runtime,
+    runtime: Runtime,
 }
 
 /// Implements [`Send`] for [`Engine`].
@@ -32,10 +35,7 @@ unsafe impl Sync for Engine {}
 impl Engine {
     #[inline]
     pub(crate) fn wrap(internal: *mut std::ffi::c_void, runtime: Runtime) -> Self {
-        Engine {
-            internal,
-            _runtime: runtime,
-        }
+        Engine { internal, runtime }
     }
 
     pub fn serialize(&self) -> Result<HostBuffer> {
@@ -110,21 +110,27 @@ impl Engine {
         TensorIoMode::from_i32(tensor_io_mode)
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
         let Engine { internal, .. } = *self;
         internal
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_mut_ptr(&mut self) -> *mut std::ffi::c_void {
         let Engine { internal, .. } = *self;
         internal
+    }
+
+    #[inline(always)]
+    pub fn device(&self) -> DeviceId {
+        self.runtime.device()
     }
 }
 
 impl Drop for Engine {
     fn drop(&mut self) {
+        let _device_guard = Device::bind_or_panic(self.runtime.device());
         let Engine { internal, .. } = *self;
         cpp!(unsafe [
             internal as "void*"
@@ -139,6 +145,7 @@ impl Drop for Engine {
 /// Refer to [`crate::ExecutionContext`] for documentation.
 pub struct ExecutionContext<'engine> {
     internal: *mut std::ffi::c_void,
+    device: DeviceId,
     _parent: Option<std::sync::Arc<Engine>>,
     _phantom: std::marker::PhantomData<&'engine ()>,
 }
@@ -164,6 +171,7 @@ impl ExecutionContext<'static> {
             internal,
             Self {
                 internal,
+                device: engine.device(),
                 _parent: Some(std::sync::Arc::new(engine)),
                 _phantom: Default::default(),
             }
@@ -175,6 +183,7 @@ impl ExecutionContext<'static> {
         for _ in 0..num {
             internals.push(unsafe { Self::new_internal(&mut engine) });
         }
+        let device = engine.device();
         let parent = std::sync::Arc::new(engine);
         internals
             .into_iter()
@@ -183,6 +192,7 @@ impl ExecutionContext<'static> {
                     internal,
                     Self {
                         internal,
+                        device,
                         _parent: Some(parent.clone()),
                         _phantom: Default::default(),
                     }
@@ -199,6 +209,7 @@ impl<'engine> ExecutionContext<'engine> {
             internal,
             Self {
                 internal,
+                device: engine.device(),
                 _parent: None,
                 _phantom: Default::default(),
             }
@@ -233,19 +244,25 @@ impl<'engine> ExecutionContext<'engine> {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
         let ExecutionContext { internal, .. } = *self;
         internal
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_mut_ptr(&mut self) -> *mut std::ffi::c_void {
         let ExecutionContext { internal, .. } = *self;
         internal
     }
 
+    #[inline(always)]
+    pub fn device(&self) -> DeviceId {
+        self.device
+    }
+
     unsafe fn new_internal(engine: &mut Engine) -> *mut std::ffi::c_void {
+        let _device_guard = Device::bind_or_panic(engine.device());
         let internal_engine = engine.as_mut_ptr();
         let internal = cpp!(unsafe [
             internal_engine as "void*"
@@ -284,6 +301,7 @@ impl<'engine> ExecutionContext<'engine> {
 
 impl<'engine> Drop for ExecutionContext<'engine> {
     fn drop(&mut self) {
+        let _device_guard = Device::bind_or_panic(self.device);
         let ExecutionContext { internal, .. } = *self;
         cpp!(unsafe [
             internal as "void*"

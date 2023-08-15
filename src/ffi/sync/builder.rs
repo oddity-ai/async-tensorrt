@@ -1,5 +1,8 @@
 use cpp::cpp;
 
+use async_cuda::device::DeviceId;
+use async_cuda::ffi::device::Device;
+
 use crate::ffi::builder_config::BuilderConfig;
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
@@ -10,7 +13,10 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 /// Synchronous implementation of [`crate::Builder`].
 ///
 /// Refer to [`crate::Builder`] for documentation.
-pub struct Builder(*mut std::ffi::c_void);
+pub struct Builder {
+    addr: *mut std::ffi::c_void,
+    device: DeviceId,
+}
 
 /// Implements [`Send`] for [`Builder`].
 ///
@@ -28,10 +34,12 @@ unsafe impl Sync for Builder {}
 
 impl Builder {
     pub fn new() -> Self {
-        let internal = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
+        let device =
+            Device::get().unwrap_or_else(|err| panic!("failed to get current device: {err}"));
+        let addr = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
             return createInferBuilder(GLOBAL_LOGGER);
         });
-        Builder(internal)
+        Builder { addr, device }
     }
 
     pub fn add_optimization_profile(&mut self) -> Result<()> {
@@ -120,21 +128,20 @@ impl Builder {
         })
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
-        let Builder(internal) = *self;
-        internal
+        self.addr
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn as_mut_ptr(&mut self) -> *mut std::ffi::c_void {
-        let Builder(internal) = *self;
-        internal
+        self.addr
     }
 }
 
 impl Drop for Builder {
     fn drop(&mut self) {
+        let _device_guard = Device::bind_or_panic(self.device);
         let internal = self.as_mut_ptr();
         cpp!(unsafe [
             internal as "void*"
