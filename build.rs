@@ -2,6 +2,7 @@
 fn main() {
     cpp_build::Config::new()
         .include("/usr/local/cuda/include")
+        .include("/usr/local/tensorrt/include")
         .build("src/lib.rs");
     println!("cargo:rustc-link-search=/usr/local/cuda/lib64");
     println!("cargo:rustc-link-lib=nvinfer");
