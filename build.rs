@@ -5,6 +5,7 @@ fn main() {
         .include("/usr/local/tensorrt/include")
         .build("src/lib.rs");
     println!("cargo:rustc-link-search=/usr/local/cuda/lib64");
+    println!("cargo:rustc-link-search=/usr/local/tensorrt/lib64");
     println!("cargo:rustc-link-lib=nvinfer");
     println!("cargo:rustc-link-lib=nvonnxparser");
 }
