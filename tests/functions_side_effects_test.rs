@@ -86,7 +86,7 @@ async fn test_stream_new_side_effects() {
     let _mem_info_4 = Device::memory_info().unwrap();
     Device::synchronize().unwrap();
 
-    let mut builder = Builder::new();
+    let mut builder = Builder::new().unwrap();
     Device::synchronize().unwrap();
 
     builder.add_optimization_profile().unwrap();

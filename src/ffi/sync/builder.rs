@@ -33,12 +33,12 @@ unsafe impl Send for Builder {}
 unsafe impl Sync for Builder {}
 
 impl Builder {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self> {
         let device = Device::get_or_panic();
         let addr = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
             return createInferBuilder(GLOBAL_LOGGER);
         });
-        Builder { addr, device }
+        result!(addr, Builder { addr, device })
     }
 
     pub fn add_optimization_profile(&mut self) -> Result<()> {
@@ -147,11 +147,5 @@ impl Drop for Builder {
         ] {
             destroy((IBuilder*) internal);
         });
-    }
-}
-
-impl Default for Builder {
-    fn default() -> Self {
-        Builder::new()
     }
 }

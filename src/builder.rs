@@ -18,9 +18,9 @@ impl Builder {
     /// Create a new [`Builder`].
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/namespacenvinfer1_1_1anonymous__namespace_02_nv_infer_8h_03.html)
-    pub async fn new() -> Self {
-        let inner = Future::new(InnerBuilder::new).await;
-        Builder { inner }
+    pub async fn new() -> Result<Self> {
+        let inner = Future::new(InnerBuilder::new).await?;
+        Ok(Builder { inner })
     }
 
     /// Create a new optimization profile.

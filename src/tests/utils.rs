@@ -3,6 +3,7 @@ macro_rules! simple_network {
         let simple_onnx_file = $crate::tests::onnx::simple_onnx_file!();
         let mut builder = $crate::Builder::new()
             .await
+            .unwrap()
             .with_optimization_profile()
             .unwrap();
         let network =
