@@ -5,6 +5,8 @@ use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
 use crate::ffi::sync::builder::Builder as InnerBuilder;
 
+use super::optimization_profile::OptimizationProfile;
+
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
 /// Builds an engine from a network definition.
@@ -58,6 +60,27 @@ impl Builder {
     pub fn with_optimization_profile(mut self) -> Result<Self> {
         self.add_optimization_profile()?;
         Ok(self)
+    }
+
+    /// Create a new optimization profile. This function returns a mutable
+    /// reference to to configure the optimization profile.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn optimization_profile_mut<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
+        self.add_optimization_profile()?;
+        let profile = self.inner.optimization_profile_mut().unwrap();
+        Ok(OptimizationProfile::from_inner_mut(profile))
+    }
+
+    /// Return a reference to the optimization profile. None if the optimization
+    /// profile hasn't been created yet.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn optimization_profile<'a>(&'a self) -> Result<Option<OptimizationProfile<'a>>> {
+        let profile = self.inner.optimization_profile();
+        Ok(profile.map(|profile| OptimizationProfile::from_inner(profile)))
     }
 
     /// Create a builder configuration object.
