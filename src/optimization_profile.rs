@@ -147,7 +147,7 @@ impl<'a> OptimizationProfile<'a> {
         self.inner().is_valid()
     }
 
-    fn inner(&self) -> &InnerOptimizationProfile {
+    pub fn inner(&self) -> &InnerOptimizationProfile {
         self.inner_mut
             .as_ref()
             .map(|o| &**o)

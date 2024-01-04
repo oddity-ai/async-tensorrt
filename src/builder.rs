@@ -78,9 +78,9 @@ impl Builder {
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
-    pub fn optimization_profile<'a>(&'a self) -> Result<Option<OptimizationProfile<'a>>> {
+    pub fn optimization_profile<'a>(&'a self) -> Option<OptimizationProfile<'a>> {
         let profile = self.inner.optimization_profile();
-        Ok(profile.map(|profile| OptimizationProfile::from_inner(profile)))
+        profile.map(|profile| OptimizationProfile::from_inner(profile))
     }
 
     /// Create a builder configuration object.
