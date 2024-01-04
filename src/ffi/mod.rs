@@ -15,6 +15,9 @@ pub mod network;
 pub mod parser;
 pub mod sync;
 
+// Defined in NvInferRuntimeBase.h
+const MAX_DIMS: usize = 8;
+
 /// Convenience macro for turning TensorRT error code into a `std::result::Result`.
 ///
 /// # Usage

@@ -1,6 +1,7 @@
 use cpp::cpp;
 
 use crate::ffi::result;
+use crate::ffi::MAX_DIMS;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
@@ -30,9 +31,6 @@ enum OptimizationProfileSelector {
     Opt = 1,
     Max = 2,
 }
-
-// Defined in NvInferRuntimeBase.h
-const MAX_DIMS: usize = 8;
 
 impl OptimizationProfile {
     #[inline]
