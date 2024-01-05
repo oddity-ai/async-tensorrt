@@ -51,7 +51,7 @@ impl Builder {
             return ((IBuilder*) internal)->createOptimizationProfile();
         });
         let profile = result!(optimization_profile_internal, optimization_profile_internal)?;
-        Ok(OptimizationProfile::wrap(profile))
+        Ok(OptimizationProfile::wrap(profile, self))
     }
 
     pub fn add_optimization_profile(&mut self) -> Result<()> {

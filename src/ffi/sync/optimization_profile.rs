@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use cpp::cpp;
 
 use crate::ffi::result;
@@ -8,21 +10,21 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 /// Synchronous implementation of [`crate::OptimizationProfile`].
 ///
 /// Refer to [`crate::OptimizationProfile`] for documentation.
-pub struct OptimizationProfile(*mut std::ffi::c_void);
+pub struct OptimizationProfile<'a>(*mut std::ffi::c_void, PhantomData<&'a ()>);
 
 /// Implements [`Send`] for [`OptimizationProfile`].
 ///
 /// # Safety
 ///
 /// The TensorRT API is thread-safe with regards to all operations on [`OptimizationProfile`].
-unsafe impl Send for OptimizationProfile {}
+unsafe impl<'a> Send for OptimizationProfile<'a> {}
 
 /// Implements [`Sync`] for [`OptimizationProfile`].
 ///
 /// # Safety
 ///
 /// The TensorRT API is thread-safe with regards to all operations on [`OptimizationProfile`].
-unsafe impl Sync for OptimizationProfile {}
+unsafe impl<'a> Sync for OptimizationProfile<'a> {}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(i32)]
@@ -32,10 +34,10 @@ enum OptimizationProfileSelector {
     Max = 2,
 }
 
-impl OptimizationProfile {
+impl<'a> OptimizationProfile<'a> {
     #[inline]
-    pub(crate) fn wrap(internal: *mut std::ffi::c_void) -> Self {
-        OptimizationProfile(internal)
+    pub(crate) fn wrap<T>(internal: *mut std::ffi::c_void, _builder: &'a T) -> Self {
+        OptimizationProfile(internal, PhantomData)
     }
 
     pub fn set_min_shape_values(&mut self, input_name: &str, values: &[i32]) -> bool {
@@ -226,14 +228,14 @@ impl OptimizationProfile {
     /// Get internal readonly pointer.
     #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
-        let OptimizationProfile(internal) = *self;
+        let OptimizationProfile(internal, _) = *self;
         internal
     }
 
     /// Get internal mutable pointer.
     #[inline(always)]
     pub fn as_mut_ptr(&mut self) -> *mut std::ffi::c_void {
-        let OptimizationProfile(internal) = *self;
+        let OptimizationProfile(internal, _) = *self;
         internal
     }
 }
