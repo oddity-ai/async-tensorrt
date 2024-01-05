@@ -17,7 +17,6 @@ type Result<T> = std::result::Result<T, crate::error::Error>;
 /// Refer to [`crate::Builder`] for documentation.
 pub struct Builder {
     addr: *mut std::ffi::c_void,
-    optimization_profile: Option<OptimizationProfile>,
     device: DeviceId,
 }
 
@@ -41,42 +40,23 @@ impl Builder {
         let addr = cpp!(unsafe [] -> *mut std::ffi::c_void as "void*" {
             return createInferBuilder(GLOBAL_LOGGER);
         });
-        let optimization_profile = None;
-        result!(
-            addr,
-            Builder {
-                addr,
-                device,
-                optimization_profile
-            }
-        )
+        result!(addr, Builder { addr, device })
     }
 
-    pub fn add_optimization_profile(&mut self) -> Result<()> {
-        if self.optimization_profile.is_none() {
-            let internal = self.as_mut_ptr();
-            let optimization_profile_internal = cpp!(unsafe [
-                internal as "void*"
-            ] -> *mut std::ffi::c_void as "void*" {
-                return ((IBuilder*) internal)->createOptimizationProfile();
-            });
-            let profile = result!(optimization_profile_internal, optimization_profile_internal)?;
-            self.optimization_profile = Some(OptimizationProfile::wrap(profile));
-        }
-        Ok(())
+    pub fn add_optimization_profile(&mut self) -> Result<OptimizationProfile> {
+        let internal = self.as_mut_ptr();
+        let optimization_profile_internal = cpp!(unsafe [
+            internal as "void*"
+        ] -> *mut std::ffi::c_void as "void*" {
+            return ((IBuilder*) internal)->createOptimizationProfile();
+        });
+        let profile = result!(optimization_profile_internal, optimization_profile_internal)?;
+        Ok(OptimizationProfile::wrap(profile))
     }
 
     pub fn with_optimization_profile(mut self) -> Result<Self> {
         self.add_optimization_profile()?;
         Ok(self)
-    }
-
-    pub fn optimization_profile<'a>(&'a self) -> Option<&'a OptimizationProfile> {
-        self.optimization_profile.as_ref()
-    }
-
-    pub fn optimization_profile_mut<'a>(&'a mut self) -> Option<&'a mut OptimizationProfile> {
-        self.optimization_profile.as_mut()
     }
 
     pub fn config(&mut self) -> BuilderConfig {

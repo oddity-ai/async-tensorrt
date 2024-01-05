@@ -27,32 +27,14 @@ impl Builder {
 
     /// Create a new optimization profile.
     ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
-    /// may or may not actually affect the building process later.
-    ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
-    pub fn add_optimization_profile(&mut self) -> Result<()> {
-        self.inner.add_optimization_profile()
+    pub fn add_optimization_profile<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
+        let profile = self.inner.add_optimization_profile()?;
+        Ok(OptimizationProfile::from_inner(profile))
     }
 
-    /// Create a new optimization profile.
-    ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
     /// may or may not actually affect the building process later.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
@@ -60,27 +42,6 @@ impl Builder {
     pub fn with_optimization_profile(mut self) -> Result<Self> {
         self.add_optimization_profile()?;
         Ok(self)
-    }
-
-    /// Create a new optimization profile. This function returns a mutable
-    /// reference to to configure the optimization profile.
-    ///
-    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
-    #[inline(always)]
-    pub fn optimization_profile_mut<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
-        self.add_optimization_profile()?;
-        let profile = self.inner.optimization_profile_mut().unwrap();
-        Ok(OptimizationProfile::from_inner_mut(profile))
-    }
-
-    /// Return a reference to the optimization profile. None if the optimization
-    /// profile hasn't been created yet.
-    ///
-    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
-    #[inline(always)]
-    pub fn optimization_profile<'a>(&'a self) -> Option<OptimizationProfile<'a>> {
-        let profile = self.inner.optimization_profile();
-        profile.map(|profile| OptimizationProfile::from_inner(profile))
     }
 
     /// Create a builder configuration object.
