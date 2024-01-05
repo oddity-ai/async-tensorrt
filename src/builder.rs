@@ -29,8 +29,8 @@ impl Builder {
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
-    pub fn add_optimization_profile<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
-        let profile = self.inner.add_optimization_profile()?;
+    pub fn create_optimization_profile<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
+        let profile = self.inner.create_optimization_profile()?;
         Ok(OptimizationProfile::from_inner(profile))
     }
 
@@ -39,8 +39,18 @@ impl Builder {
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
+    pub fn add_optimization_profile(&mut self) -> Result<()> {
+        self.create_optimization_profile()?;
+        Ok(())
+    }
+
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
+    /// may or may not actually affect the building process later.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
     pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
+        self.create_optimization_profile()?;
         Ok(self)
     }
 

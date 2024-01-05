@@ -43,7 +43,7 @@ impl Builder {
         result!(addr, Builder { addr, device })
     }
 
-    pub fn add_optimization_profile(&mut self) -> Result<OptimizationProfile> {
+    pub fn create_optimization_profile(&mut self) -> Result<OptimizationProfile> {
         let internal = self.as_mut_ptr();
         let optimization_profile_internal = cpp!(unsafe [
             internal as "void*"
@@ -54,8 +54,13 @@ impl Builder {
         Ok(OptimizationProfile::wrap(profile))
     }
 
+    pub fn add_optimization_profile(&mut self) -> Result<()> {
+        self.create_optimization_profile()?;
+        Ok(())
+    }
+
     pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
+        self.create_optimization_profile()?;
         Ok(self)
     }
 
