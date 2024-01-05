@@ -8,6 +8,8 @@ use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
 use crate::ffi::result;
 
+use super::optimization_profile::OptimizationProfile;
+
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
 /// Synchronous implementation of [`crate::Builder`].
@@ -41,18 +43,24 @@ impl Builder {
         result!(addr, Builder { addr, device })
     }
 
-    pub fn add_optimization_profile(&mut self) -> Result<()> {
+    pub fn create_optimization_profile(&mut self) -> Result<OptimizationProfile> {
         let internal = self.as_mut_ptr();
         let optimization_profile_internal = cpp!(unsafe [
             internal as "void*"
         ] -> *mut std::ffi::c_void as "void*" {
             return ((IBuilder*) internal)->createOptimizationProfile();
         });
-        result!(optimization_profile_internal)
+        let profile = result!(optimization_profile_internal, optimization_profile_internal)?;
+        Ok(OptimizationProfile::wrap(profile, self))
+    }
+
+    pub fn add_optimization_profile(&mut self) -> Result<()> {
+        self.create_optimization_profile()?;
+        Ok(())
     }
 
     pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
+        self.create_optimization_profile()?;
         Ok(self)
     }
 

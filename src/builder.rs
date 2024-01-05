@@ -5,6 +5,8 @@ use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
 use crate::ffi::sync::builder::Builder as InnerBuilder;
 
+use super::optimization_profile::OptimizationProfile;
+
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
 /// Builds an engine from a network definition.
@@ -25,38 +27,30 @@ impl Builder {
 
     /// Create a new optimization profile.
     ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn create_optimization_profile<'a>(&'a mut self) -> Result<OptimizationProfile<'a>> {
+        let profile = self.inner.create_optimization_profile()?;
+        Ok(OptimizationProfile::from_inner(profile))
+    }
+
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
     /// may or may not actually affect the building process later.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
     pub fn add_optimization_profile(&mut self) -> Result<()> {
-        self.inner.add_optimization_profile()
+        self.create_optimization_profile()?;
+        Ok(())
     }
 
-    /// Create a new optimization profile.
-    ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
     /// may or may not actually affect the building process later.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
     pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
+        self.create_optimization_profile()?;
         Ok(self)
     }
 

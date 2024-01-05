@@ -1,6 +1,7 @@
 use cpp::cpp;
 
 use crate::ffi::parser::Parser;
+use crate::ffi::MAX_DIMS;
 
 /// A network definition for input to the builder.
 ///
@@ -224,6 +225,35 @@ impl<'parent> Tensor<'parent> {
         ] {
             return ((ITensor*) internal)->setName(name_ptr);
         });
+    }
+
+    /// Get the dimensions of a tensor.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_tensor.html#aefa740255768fbe234730577cb24fac9)
+    pub fn get_dimensions(&self) -> Vec<i32> {
+        let internal = self.as_ptr();
+        let mut dims = Vec::with_capacity(MAX_DIMS);
+        let dims_ptr = dims.as_mut_ptr();
+
+        let num_dimensions = cpp!(unsafe [
+            internal as "void*",
+            dims_ptr as "int32_t*"
+        ] -> i32 as "int32_t" {
+            auto dims = ((const ITensor*) internal)->getDimensions();
+            if (dims.nbDims > 0) {
+                for (int i = 0; i < dims.nbDims; ++i) {
+                    dims_ptr[i] = dims.d[i];
+                }
+            }
+            return dims.nbDims;
+        });
+        if num_dimensions > 0 {
+            // Safety: The vec has been initialized up until num_dimensions elements
+            unsafe {
+                dims.set_len(num_dimensions as usize);
+            }
+        }
+        return dims;
     }
 
     /// Get internal readonly pointer.
