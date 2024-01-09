@@ -4,7 +4,7 @@ macro_rules! simple_network {
         let mut builder = $crate::Builder::new()
             .await
             .unwrap()
-            .with_optimization_profile()
+            .with_default_optimization_profile()
             .unwrap();
         let network =
             builder.network_definition($crate::NetworkDefinitionCreationFlags::ExplicitBatchSize);

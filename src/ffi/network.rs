@@ -1,7 +1,9 @@
 use cpp::cpp;
 
 use crate::ffi::parser::Parser;
-use crate::ffi::MAX_DIMS;
+
+/// Defined in `NvInferRuntimeBase.h`
+const MAX_DIMS: usize = 8;
 
 /// A network definition for input to the builder.
 ///
@@ -253,7 +255,7 @@ impl<'parent> Tensor<'parent> {
                 dims.set_len(num_dimensions as usize);
             }
         }
-        return dims;
+        dims
     }
 
     /// Get internal readonly pointer.

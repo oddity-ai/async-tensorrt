@@ -83,28 +83,23 @@ impl BuilderConfig {
     /// Add an optimization profile.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ab97fa40c85fa8afab65fc2659e38da82)
-    ///
-    /// # Panics
-    ///
-    /// Panics if optimization profile is invalid
-    pub fn with_optimization_profile<'a>(
+    pub fn with_optimization_profile(
         mut self,
-        optimization_profile: OptimizationProfile<'a>,
-    ) -> Self {
-        self.add_optimization_profile(optimization_profile)
-            .expect("Failed to add optimization profile.");
-        self
+        optimization_profile: OptimizationProfile,
+    ) -> Result<Self> {
+        self.add_optimization_profile(optimization_profile)?;
+        Ok(self)
     }
 
-    /// Add an optimization profile. Returns the index of the optimization profile.
+    /// Add an optimization profile.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ab97fa40c85fa8afab65fc2659e38da82)
-    pub fn add_optimization_profile<'a>(
+    pub fn add_optimization_profile(
         &mut self,
-        optimization_profile: OptimizationProfile<'a>,
-    ) -> Result<usize> {
+        optimization_profile: OptimizationProfile,
+    ) -> Result<()> {
         let internal = self.as_mut_ptr();
-        let optimization_profile = optimization_profile.inner().as_ptr();
+        let optimization_profile = optimization_profile.as_ptr();
         let index = cpp!(unsafe [
             internal as "void*",
             optimization_profile as "const IOptimizationProfile*"
@@ -112,7 +107,7 @@ impl BuilderConfig {
            return ((IBuilderConfig*) internal)->addOptimizationProfile(optimization_profile);
         });
         if index >= 0 {
-            Ok(index as usize)
+            Ok(())
         } else {
             Err(crate::error::last_error())
         }
