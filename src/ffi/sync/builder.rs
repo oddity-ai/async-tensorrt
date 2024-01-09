@@ -6,6 +6,7 @@ use async_cuda::ffi::device::Device;
 use crate::ffi::builder_config::BuilderConfig;
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
+use crate::ffi::optimization_profile::OptimizationProfile;
 use crate::ffi::result;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
@@ -41,21 +42,6 @@ impl Builder {
         result!(addr, Builder { addr, device })
     }
 
-    pub fn add_optimization_profile(&mut self) -> Result<()> {
-        let internal = self.as_mut_ptr();
-        let optimization_profile_internal = cpp!(unsafe [
-            internal as "void*"
-        ] -> *mut std::ffi::c_void as "void*" {
-            return ((IBuilder*) internal)->createOptimizationProfile();
-        });
-        result!(optimization_profile_internal)
-    }
-
-    pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
-        Ok(self)
-    }
-
     pub fn config(&mut self) -> BuilderConfig {
         let internal = self.as_mut_ptr();
         let internal = cpp!(unsafe [
@@ -64,6 +50,29 @@ impl Builder {
             return ((IBuilder*) internal)->createBuilderConfig();
         });
         BuilderConfig::wrap(internal)
+    }
+
+    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile> {
+        let internal = self.as_mut_ptr();
+        let optimization_profile_internal = cpp!(unsafe [
+            internal as "void*"
+        ] -> *mut std::ffi::c_void as "void*" {
+            return ((IBuilder*) internal)->createOptimizationProfile();
+        });
+        result!(
+            optimization_profile_internal,
+            OptimizationProfile::wrap(optimization_profile_internal, self)
+        )
+    }
+
+    pub fn add_default_optimization_profile(&mut self) -> Result<()> {
+        self.optimization_profile()?;
+        Ok(())
+    }
+
+    pub fn with_default_optimization_profile(mut self) -> Result<Self> {
+        self.optimization_profile()?;
+        Ok(self)
     }
 
     pub fn build_serialized_network(

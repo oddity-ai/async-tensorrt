@@ -3,6 +3,7 @@ use async_cuda::runtime::Future;
 use crate::ffi::builder_config::BuilderConfig;
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::network::{NetworkDefinition, NetworkDefinitionCreationFlags};
+use crate::ffi::optimization_profile::OptimizationProfile;
 use crate::ffi::sync::builder::Builder as InnerBuilder;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
@@ -23,43 +24,6 @@ impl Builder {
         Ok(Builder { inner })
     }
 
-    /// Create a new optimization profile.
-    ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
-    /// may or may not actually affect the building process later.
-    ///
-    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
-    #[inline(always)]
-    pub fn add_optimization_profile(&mut self) -> Result<()> {
-        self.inner.add_optimization_profile()
-    }
-
-    /// Create a new optimization profile.
-    ///
-    /// Note that the official TensorRT documentation states:
-    ///
-    /// "If the network has any dynamic input tensors, the appropriate calls to setDimensions() must
-    /// be made."
-    ///
-    /// But this part of the API has not been implemented yet in `async-tensorrt`.
-    ///
-    /// This function is still useful to allocate the optimization profile in the [`Builder`], which
-    /// may or may not actually affect the building process later.
-    ///
-    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
-    #[inline(always)]
-    pub fn with_optimization_profile(mut self) -> Result<Self> {
-        self.add_optimization_profile()?;
-        Ok(self)
-    }
-
     /// Create a builder configuration object.
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a8fac4203e688430dff87483fc9db6bf2)
@@ -70,6 +34,33 @@ impl Builder {
     #[inline(always)]
     pub async fn config(&mut self) -> BuilderConfig {
         Future::new(|| self.inner.config()).await
+    }
+
+    /// Create a new optimization profile.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile> {
+        self.inner.optimization_profile()
+    }
+
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
+    /// may or may not actually affect the building process later.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn add_default_optimization_profile(&mut self) -> Result<()> {
+        self.inner.add_default_optimization_profile()
+    }
+
+    /// Create a new optimization profile. This allocates an empty optimization profile, which
+    /// may or may not actually affect the building process later.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
+    #[inline(always)]
+    pub fn with_default_optimization_profile(mut self) -> Result<Self> {
+        self.inner.add_default_optimization_profile()?;
+        Ok(self)
     }
 
     /// Create a network definition object.

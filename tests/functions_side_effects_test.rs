@@ -37,8 +37,8 @@ use async_tensorrt::ffi::sync::runtime::Runtime;
 /// | Function                                     | Side-effect: GPU | Side-effect: thread-local | Notes
 /// | -------------------------------------------- | ---------------- | ------------------------- | ---------------
 /// | `Builder::new`                               | ✅               | ❓                        |
-/// | `Builder::add_optimization_profile`          | ❌               | ❌                        |
-/// | `Builder::with_optimization_profile`         | ❌               | ❌                        |
+/// | `Builder::add_default_optimization_profile`  | ❌               | ❌                        |
+/// | `Builder::with_default_optimization_profile` | ❌               | ❌                        |
 /// | `Builder::config`                            | ✅               | ❓                        | Calls `cudaGetDeviceProperties_v2` internally.
 /// | `Builder::network_definition`                | ❌               | ❌                        |
 /// | `BuilderConfig::*`                           | ❌               | ❌                        | Since no device allocation happens in `Builder::config` we can assume there are no GPU effects.
@@ -89,10 +89,10 @@ async fn test_stream_new_side_effects() {
     let mut builder = Builder::new().unwrap();
     Device::synchronize().unwrap();
 
-    builder.add_optimization_profile().unwrap();
+    builder.add_default_optimization_profile().unwrap();
     Device::synchronize().unwrap();
 
-    let mut builder = builder.with_optimization_profile().unwrap();
+    let mut builder = builder.with_default_optimization_profile().unwrap();
     Device::synchronize().unwrap();
 
     let builder_config = builder.config();
