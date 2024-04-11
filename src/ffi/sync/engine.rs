@@ -110,6 +110,19 @@ impl Engine {
         TensorIoMode::from_i32(tensor_io_mode)
     }
 
+    pub fn tensor_data_type(&self, tensor_name: &str) -> TensorDataType {
+        let internal = self.as_ptr();
+        let tensor_name_cstr = std::ffi::CString::new(tensor_name).unwrap();
+        let tensor_name_ptr = tensor_name_cstr.as_ptr();
+        let tensor_data_type = cpp!(unsafe [
+            internal as "const void*",
+            tensor_name_ptr as "const char*"
+        ] -> i32 as "std::int32_t" {
+            return (std::int32_t) ((const ICudaEngine*) internal)->getTensorDataType(tensor_name_ptr);
+        });
+        TensorDataType::from_i32(tensor_data_type)
+    }
+
     #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
         let Engine { internal, .. } = *self;
@@ -341,4 +354,42 @@ impl TensorIoMode {
 struct Dims {
     pub nbDims: i32,
     pub d: [i32; 8usize],
+}
+
+/// Tensor DataType.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum TensorDataType {
+    FLOAT,
+    HALF,
+    INT8,
+    INT32,
+    BOOL,
+    UINT8,
+    FP8,
+    BF16,
+    INT64,
+    INT4,
+}
+
+impl TensorDataType {
+    /// Create [`TensorDataType`] from `value`.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - Integer representation of IO mode.
+    fn from_i32(value: i32) -> Self {
+        match value {
+            0 => TensorDataType::FLOAT,
+            1 => TensorDataType::HALF,
+            2 => TensorDataType::INT8,
+            3 => TensorDataType::INT32,
+            4 => TensorDataType::BOOL,
+            5 => TensorDataType::UINT8,
+            6 => TensorDataType::FP8,
+            7 => TensorDataType::BF16,
+            8 => TensorDataType::INT64,
+            9 => TensorDataType::INT4,
+            _ => panic!("Unknown data type {}", value),
+        }
+    }
 }

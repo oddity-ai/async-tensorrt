@@ -33,6 +33,11 @@ fn main() {
     #[cfg(not(windows))]
     println!("cargo:rustc-link-search=/usr/local/tensorrt/lib64");
 
+    #[cfg(feature = "lean")]
+    println!("cargo:rustc-link-lib=nvinfer_lean");
+
+    #[cfg(not(feature = "lean"))]
     println!("cargo:rustc-link-lib=nvinfer");
+    #[cfg(not(feature = "lean"))]
     println!("cargo:rustc-link-lib=nvonnxparser");
 }

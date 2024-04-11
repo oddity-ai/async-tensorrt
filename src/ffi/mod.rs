@@ -8,11 +8,16 @@ mod pre {
     mod logger;
 }
 
+#[cfg(not(feature = "lean"))]
 pub mod builder_config;
+
 pub mod error;
 pub mod memory;
 pub mod network;
+
+#[cfg(not(feature = "lean"))]
 pub mod optimization_profile;
+
 pub mod parser;
 pub mod sync;
 
