@@ -61,7 +61,7 @@ impl BuilderConfig {
         cpp!(unsafe [
             internal as "void*"
         ] {
-            #if NV_TENSORRT_MAJOR > 9
+            #if NV_TENSORRT_MAJOR >= 10
             ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kPREFER_PRECISION_CONSTRAINTS);
             ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kDIRECT_IO);
             ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kREJECT_EMPTY_ALGORITHMS);
