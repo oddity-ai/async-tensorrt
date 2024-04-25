@@ -9,7 +9,11 @@ cpp! {{
     void destroy(T* destroyable) {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+        #if NV_TENSORRT_MAJOR > 9
+        destroyable->~T();
+        #else
         destroyable->destroy();
+        #endif
         #pragma GCC diagnostic pop
     }
 }}
