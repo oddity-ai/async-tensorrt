@@ -85,7 +85,7 @@ impl Engine {
         let tensor_dimensions = cpp!(unsafe [
             internal as "const void*",
             tensor_name_ptr as "const char*"
-        ] -> Dims as "Dims32" {
+        ] -> Dims as "Dims64" {
             return ((const ICudaEngine*) internal)->getTensorShape(tensor_name_ptr);
         });
 
@@ -340,5 +340,5 @@ impl TensorIoMode {
 #[allow(non_snake_case)]
 struct Dims {
     pub nbDims: i32,
-    pub d: [i32; 8usize],
+    pub d: [i64; 8usize],
 }
