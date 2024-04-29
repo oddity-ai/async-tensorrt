@@ -4,6 +4,7 @@
 #[rustfmt::skip]
 mod pre {
     mod includes;
+    mod shims;
     mod helpers;
     mod logger;
 }

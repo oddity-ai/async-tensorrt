@@ -86,7 +86,17 @@ impl Engine {
             internal as "const void*",
             tensor_name_ptr as "const char*"
         ] -> Dims as "Dims64" {
+            #if NV_TENSORRT_MAJOR >= 10
             return ((const ICudaEngine*) internal)->getTensorShape(tensor_name_ptr);
+            #else
+            Dims32 dims32 = ((const ICudaEngine*) internal)->getTensorShape(tensor_name_ptr);
+            Dims64 dims64;
+            dims64.nbDims = dims32.nbDims;
+            for (int i = 0; i < dims32.nbDims; i++) {
+                dims64.d[i] = dims32.d[i];
+            }
+            return dims64;
+            #endif
         });
 
         let mut dimensions = Vec::with_capacity(tensor_dimensions.nbDims as usize);
@@ -334,7 +344,7 @@ impl TensorIoMode {
     }
 }
 
-/// Internal representation of the `Dims32` struct in TensorRT.
+/// Internal representation of the `Dims64` struct in TensorRT.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(non_snake_case)]
