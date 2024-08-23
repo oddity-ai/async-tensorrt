@@ -1,7 +1,7 @@
 <h1 align="center">
   <code>async-tensorrt</code>
 </h1>
-<p align="center">Asynchronous wrapper for TensorRT 8.</p>
+<p align="center">Asynchronous wrapper for TensorRT.</p>
 <div align="center">
 
 [![version](https://img.shields.io/crates/v/async-tensorrt)](https://crates.io/crates/async-tensorrt)
@@ -29,7 +29,7 @@ Make sure you have the necessary dependencies installed:
 Then, add the following to your dependencies in `Cargo.toml`:
 
 ```toml
-async-tensorrt = "0.7"
+async-tensorrt = "0.8"
 ```
 
 ## ⚠️ Safety warning
