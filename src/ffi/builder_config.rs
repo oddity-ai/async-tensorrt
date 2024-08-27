@@ -72,6 +72,34 @@ impl BuilderConfig {
         self
     }
 
+    /// Set the `kVERSION_COMPATIBLE` flag.
+    ///
+    /// [TensorRT documentation for `setFlag`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ac9821504ae7a11769e48b0e62761837e)
+    /// [TensorRT documentation for `kVERSION_COMPATIBLE`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/namespacenvinfer1.html#abdc74c40fe7a0c3d05d2caeccfbc29c1a64917aa1f8d9238c555a46fa1d4e83b7)
+    pub fn with_version_compability(mut self) -> Self {
+        let internal = self.as_mut_ptr();
+        cpp!(unsafe [
+            internal as "void*"
+        ] {
+            ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kVERSION_COMPATIBLE);
+        });
+        self
+    }
+
+    /// Set the `kEXCLUDE_LEAN_RUNTIME` flag.
+    ///
+    /// [TensorRT documentation for `setFlag`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ac9821504ae7a11769e48b0e62761837e)
+    /// [TensorRT documentation for `kEXCLUDE_LEAN_RUNTIME`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/namespacenvinfer1.html#abdc74c40fe7a0c3d05d2caeccfbc29c1a239d59ead8393beeecaadd21ce3b3502)
+    pub fn with_exclude_lean_runtime(mut self) -> Self {
+        let internal = self.as_mut_ptr();
+        cpp!(unsafe [
+            internal as "void*"
+        ] {
+            ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kEXCLUDE_LEAN_RUNTIME);
+        });
+        self
+    }
+
     /// Set the `kFP16` flag.
     ///
     /// [TensorRT documentation for `setFlag`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ac9821504ae7a11769e48b0e62761837e)
@@ -82,6 +110,20 @@ impl BuilderConfig {
             internal as "void*"
         ] {
             ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kFP16);
+        });
+        self
+    }
+
+    /// Set the `kINT8` flag.
+    ///
+    /// [TensorRT documentation for `setFlag`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder_config.html#ac9821504ae7a11769e48b0e62761837e)
+    /// [TensorRT documentation for `kINT8`](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/namespacenvinfer1.html#abdc74c40fe7a0c3d05d2caeccfbc29c1a69c1a4a69db0e50820cf63122f90ad09)
+    pub fn with_int8(mut self) -> Self {
+        let internal = self.as_mut_ptr();
+        cpp!(unsafe [
+            internal as "void*"
+        ] {
+            ((IBuilderConfig*) internal)->setFlag(BuilderFlag::kINT8);
         });
         self
     }
