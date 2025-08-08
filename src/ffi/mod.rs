@@ -16,6 +16,7 @@ pub mod network;
 pub mod optimization_profile;
 pub mod parser;
 pub mod sync;
+pub mod version;
 
 /// Convenience macro for turning TensorRT error code into a `std::result::Result`.
 ///
