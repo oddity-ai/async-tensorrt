@@ -41,7 +41,7 @@ impl NetworkDefinition {
     }
 
     /// Get network inputs.
-    pub fn inputs(&self) -> Vec<Tensor> {
+    pub fn inputs(&self) -> Vec<Tensor<'_>> {
         let mut inputs = Vec::with_capacity(self.num_inputs());
         for index in 0..self.num_inputs() {
             inputs.push(self.input(index));
