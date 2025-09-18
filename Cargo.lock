@@ -28,9 +28,9 @@ dependencies = [
 
 [[package]]
 name = "async-cuda"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30457c4214cf8332515b7c6a7ecd9cdc2ff3b94a0c2677720e2a5612014cddb2"
+checksum = "56bf487caab780f706b84b5714aa01c27996429d0d0e1538617582038dd0526c"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "async-tensorrt"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "async-cuda",
  "cpp",
