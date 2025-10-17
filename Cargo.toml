@@ -10,6 +10,9 @@ authors = ["Oddity.ai Developers <hello@oddity.ai>"]
 repository = "https://github.com/oddity-ai/async-tensorrt"
 license = "MIT OR Apache-2.0"
 
+[features]
+lean = []
+
 [dependencies]
 async-cuda = "0.6.1"
 cpp = "0.5"
