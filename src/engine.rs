@@ -144,7 +144,7 @@ impl<'engine> ExecutionContext<'engine> {
     /// # Arguments
     ///
     /// * `engine` - Parent engine.
-    pub async fn new(engine: &mut Engine) -> Result<ExecutionContext> {
+    pub async fn new(engine: &mut Engine) -> Result<ExecutionContext<'_>> {
         Future::new(move || {
             InnerExecutionContext::new(&mut engine.inner).map(ExecutionContext::from_inner)
         })

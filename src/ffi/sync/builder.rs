@@ -52,7 +52,7 @@ impl Builder {
         BuilderConfig::wrap(internal)
     }
 
-    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile> {
+    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile<'_>> {
         let internal = self.as_mut_ptr();
         let optimization_profile_internal = cpp!(unsafe [
             internal as "void*"

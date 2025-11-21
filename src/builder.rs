@@ -40,7 +40,7 @@ impl Builder {
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_builder.html#a68a8b59fbf86e42762b7087e6ffe6fb4)
     #[inline(always)]
-    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile> {
+    pub fn optimization_profile(&mut self) -> Result<OptimizationProfile<'_>> {
         self.inner.optimization_profile()
     }
 

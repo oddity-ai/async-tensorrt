@@ -5,22 +5,22 @@ keywords = ["async", "nvidia", "cuda", "gpu", "tensorrt"]
 readme = "README.md"
 categories = ["asynchronous"]
 edition = "2021"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Oddity.ai Developers <hello@oddity.ai>"]
 repository = "https://github.com/oddity-ai/async-tensorrt"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-async-cuda = "0.6.0"
+async-cuda = "0.6.1"
 cpp = "0.5"
 tracing = "0.1"
 
 [dev-dependencies]
 tempfile = "3.4"
 tokio = { version = "1", default-features = false, features = [
-    "macros",
-    "test-util",
-    "time",
+  "macros",
+  "test-util",
+  "time",
 ] }
 
 [build-dependencies]

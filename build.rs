@@ -11,7 +11,7 @@ fn search_for_path(
     } else {
         std::env::var(base_env)
             .map(std::path::PathBuf::from)
-            .expect(&format!("Missing environment variable `{base_env}`."))
+            .unwrap_or_else(|_| panic!("Missing environment variable `{base_env}`."))
     };
 
     let include_path = std::env::var(include_env)
