@@ -226,12 +226,12 @@ impl<'engine> ExecutionContext<'engine> {
         )
     }
 
-    fn bind<T: Copy>(
+    pub fn bind<T: Copy>(
         &mut self,
         tensor_name: &str,
         buffer: &mut async_cuda::ffi::memory::DeviceBuffer<T>,
     ) -> Result<()> {
-        self.set_tensor_address(tensor_name, buffer)?;
+        Ok(unsafe { self.set_tensor_address(tensor_name, buffer) }?)
     }
 
     /// Enqueue with pre-bound
