@@ -226,6 +226,32 @@ impl<'engine> ExecutionContext<'engine> {
         )
     }
 
+    fn bind<T: Copy>(
+        &mut self,
+        tensor_name: &str,
+        buffer: &mut async_cuda::ffi::memory::DeviceBuffer<T>,
+    ) -> Result<()> {
+        self.set_tensor_address(tensor_name, buffer)?;
+    }
+
+    /// Enqueue with pre-bound
+    /// this allows for assorted types of inputs
+    pub fn enqueue_prebound(&mut self, stream: &async_cuda::ffi::stream::Stream) -> Result<()> {
+        let internal = self.as_mut_ptr();
+        let stream_ptr = stream.as_internal().as_ptr();
+        let success = cpp!(unsafe [
+            internal as "void*",
+            stream_ptr as "const void*"
+        ] -> bool as "bool" {
+            return ((IExecutionContext*) internal)->enqueueV3((cudaStream_t) stream_ptr);
+        });
+        if success {
+            Ok(())
+        } else {
+            Err(last_error())
+        }
+    }
+
     pub fn enqueue<T: Copy>(
         &mut self,
         io_tensors: &mut std::collections::HashMap<
