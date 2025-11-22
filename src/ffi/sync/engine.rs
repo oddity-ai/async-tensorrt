@@ -2,6 +2,7 @@ use cpp::cpp;
 
 use async_cuda::device::DeviceId;
 use async_cuda::ffi::device::Device;
+use async_cuda::ffi::ptr::DevicePtr;
 
 use crate::error::last_error;
 use crate::ffi::memory::HostBuffer;
@@ -294,12 +295,12 @@ impl<'engine> ExecutionContext<'engine> {
         )
     }
 
-    pub fn bind<T: Copy>(
+    pub fn bind_tensor<T: Copy>(
         &mut self,
         tensor_name: &str,
-        buffer: &mut async_cuda::ffi::memory::DeviceBuffer<T>,
+        buffer: &mut async_cuda::ffi::memory::DeviceTensor<T>,
     ) -> Result<()> {
-        Ok(unsafe { self.set_tensor_address(tensor_name, buffer) }?)
+        Ok(unsafe { self.set_tensor_address::<T>(tensor_name, buffer.as_mut_internal()) }?)
     }
 
     /// Enqueue with pre-bound
@@ -331,7 +332,7 @@ impl<'engine> ExecutionContext<'engine> {
         let internal = self.as_mut_ptr();
         for (tensor_name, buffer) in io_tensors {
             unsafe {
-                self.set_tensor_address(tensor_name, buffer)?;
+                self.set_tensor_address::<T>(tensor_name, buffer.as_mut_internal())?;
             }
         }
         let stream_ptr = stream.as_internal().as_ptr();
@@ -379,12 +380,11 @@ impl<'engine> ExecutionContext<'engine> {
     unsafe fn set_tensor_address<T: Copy>(
         &mut self,
         tensor_name: &str,
-        buffer: &mut async_cuda::ffi::memory::DeviceBuffer<T>,
+        buffer_ptr: &mut DevicePtr,
     ) -> Result<()> {
         let internal = self.as_mut_ptr();
         let tensor_name_cstr = std::ffi::CString::new(tensor_name).unwrap();
         let tensor_name_ptr = tensor_name_cstr.as_ptr();
-        let buffer_ptr = buffer.as_mut_internal().as_mut_ptr();
         let success = cpp!(unsafe [
             internal as "const void*",
             tensor_name_ptr as "const char*",
