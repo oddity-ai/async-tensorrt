@@ -100,13 +100,15 @@ impl Engine {
             internal as "const void*",
             io_tensor_index as "int"
         ] -> i32 as "DataType" {
-            #if NV_TENSORRT_MAJOR >= 10
+            // Added in TRT 8
+            #if NV_TENSORRT_MAJOR >= 8
             const char* name = ((const ICudaEngine*) internal)->getIOTensorName(io_tensor_index);
             if(name == nullptr) {
-                return DataType::Float;
+                return DataType::kFLOAT;
             }
-            return ((const ICudaEngine*) internal)->getTensorDataType(tensor_name_ptr);
+            return ((const ICudaEngine*) internal)->getTensorDataType(name);
             #else
+            // Removed in TRT 10
             return ((const ICudaEngine*) internal)->getBindingDataType(io_tensor_index);
             #endif
         });
