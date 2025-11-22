@@ -32,6 +32,7 @@ unsafe impl Send for Engine {}
 /// The TensorRT API is thread-safe with regards to all operations on [`Engine`].
 unsafe impl Sync for Engine {}
 
+#[derive(Copy, Clone, Debug)]
 pub enum DataType {
     /// 32-bit floating point format.
     Float,
