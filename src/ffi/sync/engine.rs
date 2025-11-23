@@ -406,12 +406,9 @@ impl<'engine> ExecutionContext<'engine> {
             tensor_name_ptr as "const char*",
             buffer_ptr as "void*"
         ] -> bool as "bool" {
-            const void* prevTensorAddr = ((IExecutionContext*) internal)->getTensorAddress(
-                tensor_name_ptr);
             return ((IExecutionContext*) internal)->setTensorAddress(
                 tensor_name_ptr,
-                0
-                //buffer_ptr
+                buffer_ptr
             );
         });
         if success {
