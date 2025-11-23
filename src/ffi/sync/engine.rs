@@ -387,10 +387,8 @@ impl<'engine> ExecutionContext<'engine> {
             internal_engine as "void*"
         ] -> *mut std::ffi::c_void as "void*" {
             void* out = (void*) ((ICudaEngine*) internal_engine)->createExecutionContext();
-            fprintf(stderr, "Execution Ptr: %p\n", out);
             return out;
         });
-        eprintln!("ExecutionContext address: {internal:?}");
         internal
     }
 
@@ -403,19 +401,13 @@ impl<'engine> ExecutionContext<'engine> {
         let tensor_name_cstr = std::ffi::CString::new(tensor_name).unwrap();
         let tensor_name_ptr = tensor_name_cstr.as_ptr();
         let buffer_ptr = buffer_ptr.as_ptr();
-        eprintln!("buffer: {buffer_ptr:?}");
         let success = cpp!(unsafe [
             internal as "void*",
             tensor_name_ptr as "const char*",
             buffer_ptr as "void*"
         ] -> bool as "bool" {
-            fprintf(stderr, "Engine: %p\n", internal);
-            fprintf(stderr, "Getting tensor name: %s\n", tensor_name_ptr);
             const void* prevTensorAddr = ((IExecutionContext*) internal)->getTensorAddress(
                 tensor_name_ptr);
-            fprintf(stderr, "Prev addr: %p", prevTensorAddr);
-
-            fprintf(stderr, "Setting tensor name: %s, buffer ptr: %p, execution: %p\n", tensor_name_ptr, buffer_ptr, internal);
             return ((IExecutionContext*) internal)->setTensorAddress(
                 tensor_name_ptr,
                 0
