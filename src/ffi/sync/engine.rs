@@ -298,7 +298,7 @@ impl ExecutionContext<'static> {
 }
 
 impl<'engine> ExecutionContext<'engine> {
-    pub fn new(engine: &'engine mut Engine) -> Result<Self> {
+    pub fn new(engine: &'engine Engine) -> Result<Self> {
         let internal = unsafe { Self::new_internal(engine) };
         result!(
             internal,
