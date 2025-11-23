@@ -1,13 +1,12 @@
-use cpp::cpp;
-
-use async_cuda::device::DeviceId;
-use async_cuda::ffi::device::Device;
-use async_cuda::ffi::ptr::DevicePtr;
-
 use crate::error::last_error;
 use crate::ffi::memory::HostBuffer;
 use crate::ffi::result;
 use crate::ffi::sync::runtime::Runtime;
+use async_cuda::device::DeviceId;
+use async_cuda::ffi::device::Device;
+use async_cuda::ffi::ptr::DevicePtr;
+use cpp::cpp;
+use std::sync::Arc;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
 
@@ -70,6 +69,7 @@ pub enum DataType {
 impl Engine {
     #[inline]
     pub(crate) fn wrap(internal: *mut std::ffi::c_void, runtime: Runtime) -> Self {
+        eprintln!("Engine address: {internal:?}");
         Engine { internal, runtime }
     }
 
@@ -211,6 +211,7 @@ impl Engine {
 
 impl Drop for Engine {
     fn drop(&mut self) {
+        eprintln!("Dropping Engine");
         Device::set_or_panic(self.runtime.device());
         let Engine { internal, .. } = *self;
         cpp!(unsafe [
@@ -246,8 +247,8 @@ unsafe impl<'engine> Send for ExecutionContext<'engine> {}
 unsafe impl<'engine> Sync for ExecutionContext<'engine> {}
 
 impl ExecutionContext<'static> {
-    pub fn from_engine(mut engine: Engine) -> Result<Self> {
-        let internal = unsafe { Self::new_internal(&mut engine) };
+    pub fn from_engine(engine: Engine) -> Result<Self> {
+        let internal = unsafe { Self::new_internal(&engine) };
         result!(
             internal,
             Self {
@@ -259,10 +260,23 @@ impl ExecutionContext<'static> {
         )
     }
 
-    pub fn from_engine_many(mut engine: Engine, num: usize) -> Result<Vec<Self>> {
+    pub fn from_shared_engine(engine: Arc<Engine>) -> Result<Self> {
+        let internal = unsafe { Self::new_internal(&engine) };
+        result!(
+            internal,
+            Self {
+                internal,
+                device: engine.device(),
+                _parent: Some(engine),
+                _phantom: Default::default(),
+            }
+        )
+    }
+
+    pub fn from_engine_many(engine: Engine, num: usize) -> Result<Vec<Self>> {
         let mut internals = Vec::with_capacity(num);
         for _ in 0..num {
-            internals.push(unsafe { Self::new_internal(&mut engine) });
+            internals.push(unsafe { Self::new_internal(&engine) });
         }
         let device = engine.device();
         let parent = std::sync::Arc::new(engine);
@@ -368,14 +382,17 @@ impl<'engine> ExecutionContext<'engine> {
         self.device
     }
 
-    unsafe fn new_internal(engine: &mut Engine) -> *mut std::ffi::c_void {
+    unsafe fn new_internal(engine: &Engine) -> *mut std::ffi::c_void {
         Device::set_or_panic(engine.device());
-        let internal_engine = engine.as_mut_ptr();
+        let internal_engine = engine.as_ptr();
         let internal = cpp!(unsafe [
             internal_engine as "void*"
         ] -> *mut std::ffi::c_void as "void*" {
-            return (void*) ((ICudaEngine*) internal_engine)->createExecutionContext();
+            void* out = (void*) ((ICudaEngine*) internal_engine)->createExecutionContext();
+            fprintf(stderr, "Execution Ptr: %p\n", out);
+            return out;
         });
+        eprintln!("ExecutionContext address: {internal:?}");
         internal
     }
 
@@ -387,14 +404,24 @@ impl<'engine> ExecutionContext<'engine> {
         let internal = self.as_mut_ptr();
         let tensor_name_cstr = std::ffi::CString::new(tensor_name).unwrap();
         let tensor_name_ptr = tensor_name_cstr.as_ptr();
+        let buffer_ptr = buffer_ptr.as_ptr();
+        eprintln!("buffer: {buffer_ptr:?}");
         let success = cpp!(unsafe [
-            internal as "const void*",
+            internal as "void*",
             tensor_name_ptr as "const char*",
             buffer_ptr as "void*"
         ] -> bool as "bool" {
+            fprintf(stderr, "Engine: %p\n", internal);
+            fprintf(stderr, "Getting tensor name: %s\n", tensor_name_ptr);
+            const void* prevTensorAddr = ((IExecutionContext*) internal)->getTensorAddress(
+                tensor_name_ptr);
+            fprintf(stderr, "Prev addr: %p", prevTensorAddr);
+
+            fprintf(stderr, "Setting tensor name: %s, buffer ptr: %p, execution: %p\n", tensor_name_ptr, buffer_ptr, internal);
             return ((IExecutionContext*) internal)->setTensorAddress(
                 tensor_name_ptr,
-                buffer_ptr
+                0
+                //buffer_ptr
             );
         });
         if success {
@@ -407,6 +434,7 @@ impl<'engine> ExecutionContext<'engine> {
 
 impl<'engine> Drop for ExecutionContext<'engine> {
     fn drop(&mut self) {
+        eprintln!("Dropping ExecutionContext");
         Device::set_or_panic(self.device);
         let ExecutionContext { internal, .. } = *self;
         cpp!(unsafe [
