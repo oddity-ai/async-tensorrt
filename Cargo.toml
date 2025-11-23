@@ -15,6 +15,10 @@ async-cuda = "0.6.1"
 cpp = "0.5"
 tracing = "0.1"
 
+[patch.crates-io]
+# need to upstream cuda get devices
+async-cuda = { git = "https://github.com/micahcc/async-cuda.git", branch = "main"}
+
 [dev-dependencies]
 tempfile = "3.4"
 tokio = { version = "1", default-features = false, features = [
