@@ -3,7 +3,6 @@ use cpp::cpp;
 cpp! {{
     #include <cstdint>
     #include <string>
-    #include <cstdio>
 }}
 
 cpp! {{

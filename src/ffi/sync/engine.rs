@@ -69,7 +69,6 @@ pub enum DataType {
 impl Engine {
     #[inline]
     pub(crate) fn wrap(internal: *mut std::ffi::c_void, runtime: Runtime) -> Self {
-        eprintln!("Engine address: {internal:?}");
         Engine { internal, runtime }
     }
 
@@ -211,7 +210,6 @@ impl Engine {
 
 impl Drop for Engine {
     fn drop(&mut self) {
-        eprintln!("Dropping Engine");
         Device::set_or_panic(self.runtime.device());
         let Engine { internal, .. } = *self;
         cpp!(unsafe [
@@ -434,7 +432,6 @@ impl<'engine> ExecutionContext<'engine> {
 
 impl<'engine> Drop for ExecutionContext<'engine> {
     fn drop(&mut self) {
-        eprintln!("Dropping ExecutionContext");
         Device::set_or_panic(self.device);
         let ExecutionContext { internal, .. } = *self;
         cpp!(unsafe [
