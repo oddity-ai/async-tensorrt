@@ -29,8 +29,7 @@ dependencies = [
 [[package]]
 name = "async-cuda"
 version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56bf487caab780f706b84b5714aa01c27996429d0d0e1538617582038dd0526c"
+source = "git+https://github.com/micahcc/async-cuda.git?branch=main#80bf68771b6da5a2e1c97cf6045668348dc9be76"
 dependencies = [
  "cpp",
  "cpp_build",
