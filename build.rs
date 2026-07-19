@@ -71,6 +71,11 @@ fn main() {
     println!("cargo:rustc-link-search={}", cuda_lib_path.display());
     println!("cargo:rustc-link-search={}", tensorrt_lib_path.display());
 
+    #[cfg(feature = "lean")]
+    println!("cargo:rustc-link-lib=nvinfer_lean");
+
+    #[cfg(not(feature = "lean"))]
     println!("cargo:rustc-link-lib=nvinfer");
+    #[cfg(not(feature = "lean"))]
     println!("cargo:rustc-link-lib=nvonnxparser");
 }

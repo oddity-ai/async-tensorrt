@@ -20,6 +20,17 @@ impl Runtime {
         Self { inner }
     }
 
+    /// Set whether the runtime is allowed to deserialize engines with host executable code.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_runtime.html#a5a19c2524f74179cd9b781c6240eb3ce)
+    ///
+    /// # Arguments
+    ///
+    /// * `allowed` - Whether the runtime is allowed to deserialize engines with host executable code.
+    pub fn set_engine_host_code_allowed(&mut self, allowed: bool) {
+        self.inner.set_engine_host_code_allowed(allowed);
+    }
+
     /// Deserialize engine from a plan (a [`HostBuffer`]).
     ///
     /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_runtime.html#ad0dc765e77cab99bfad901e47216a767)

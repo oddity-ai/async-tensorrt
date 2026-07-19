@@ -5,6 +5,7 @@ use crate::ffi::memory::HostBuffer;
 use crate::ffi::sync::engine::Engine as InnerEngine;
 use crate::ffi::sync::engine::ExecutionContext as InnerExecutionContext;
 
+pub use crate::ffi::sync::engine::TensorDataType;
 pub use crate::ffi::sync::engine::TensorIoMode;
 
 type Result<T> = std::result::Result<T, crate::error::Error>;
@@ -76,6 +77,18 @@ impl Engine {
     #[inline(always)]
     pub fn tensor_io_mode(&self, tensor_name: &str) -> TensorIoMode {
         self.inner.tensor_io_mode(tensor_name)
+    }
+
+    /// Get the data type of a tensor.
+    ///
+    /// [TensorRT documentation](https://docs.nvidia.com/deeplearning/tensorrt/api/c_api/classnvinfer1_1_1_i_cuda_engine.html#a569361fe7b7fced4b9c3f500346baca2)
+    ///
+    /// # Arguments
+    ///
+    /// * `tensor_name` - Tensor name.
+    #[inline(always)]
+    pub fn tensor_data_type(&self, tensor_name: &str) -> TensorDataType {
+        self.inner.tensor_data_type(tensor_name)
     }
 }
 

@@ -85,6 +85,16 @@ impl Runtime {
         result!(internal_engine, Engine::wrap(internal_engine, self))
     }
 
+    pub fn set_engine_host_code_allowed(&mut self, allowed: bool) {
+        let internal = self.as_mut_ptr();
+        cpp!(unsafe [
+            internal as "void*",
+            allowed as "bool"
+        ] {
+            ((IRuntime*) internal)->setEngineHostCodeAllowed(allowed);
+        });
+    }
+
     #[inline(always)]
     pub fn as_ptr(&self) -> *const std::ffi::c_void {
         self.addr
